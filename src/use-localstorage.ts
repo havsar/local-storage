@@ -1,28 +1,36 @@
 import {
-  writeStorage,
-  deleteFromStorage,
-  LocalStorageChanged,
-  isTypeOfLocalStorageChanged,
-} from './local-storage-events';
-import { storage  } from './storage'
-import { useEffect, useState, useCallback } from 'react';
+    deleteFromStorage,
+    isTypeOfLocalStorageChanged,
+    LocalStorageChanged,
+    writeStorage
+} from "./local-storage-events"
+import { storage } from "./storage"
+import { useCallback, useEffect, useState } from "react"
 
 /**
  * This exists for trying to serialize the value back to JSON.
  * If it cannot serialize it, then it was a string value given.
- * 
+ *
  * @param value the value you wish to try to parse
  */
 function tryParse(value: string) {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return value;
-  }
+    try {
+        return JSON.parse(value)
+    } catch {
+        return value
+    }
 }
 
-export type LocalStorageNullableReturnValue<TValue> = [TValue | null, (newValue: TValue | null) => void, () => void];
-export type LocalStorageReturnValue<TValue> = [TValue, (newValue: TValue | null) => void, () => void];
+export type LocalStorageNullableReturnValue<TValue> = [
+    TValue | null,
+    (newValue: TValue | null) => void,
+    () => void
+]
+export type LocalStorageReturnValue<TValue> = [
+    TValue,
+    (newValue: TValue | null) => void,
+    () => void
+]
 
 /**
  * React hook to enable updates to state via localStorage.
@@ -48,56 +56,69 @@ export type LocalStorageReturnValue<TValue> = [TValue, (newValue: TValue | null)
  * associated with the key in position 0, a function to set the value in position 1,
  * and a function to delete the value from localStorage in position 2.
  */
-export function useLocalStorage<TValue = string>(key: string): LocalStorageNullableReturnValue<TValue>;
-export function useLocalStorage<TValue = string>(key: string, defaultValue: TValue): LocalStorageReturnValue<TValue>;
 export function useLocalStorage<TValue = string>(
-  key: string,
-  defaultValue: TValue | null = null,
+    key: string
+): LocalStorageNullableReturnValue<TValue>
+export function useLocalStorage<TValue = string>(
+    key: string,
+    defaultValue: TValue
+): LocalStorageReturnValue<TValue>
+export function useLocalStorage<TValue = string>(
+    key: string,
+    defaultValue: TValue | null = null
 ) {
-  const [localState, updateLocalState] = useState<TValue | null>(
-    storage.getItem(key) === null
-      ? defaultValue
-      : tryParse(storage.getItem(key)!)
-  );
+    const [localState, updateLocalState] = useState<TValue | null>(
+        storage.getItem(key) === null
+            ? defaultValue
+            : tryParse(storage.getItem(key)!)
+    )
 
-  const onLocalStorageChange = (event: LocalStorageChanged<TValue> | StorageEvent) => {
-    // An event value can be of TValue when `localStorage.setItem` is called, or null when
-    // `localStorage.removeItem` is called.
-    if (isTypeOfLocalStorageChanged<TValue>(event)) {
-      if (event.detail.key === key) {
-        updateLocalState(event.detail.value);
-      }
-    } else {
-      if (event.key === key) {
-        updateLocalState(event.newValue === null ? null : tryParse(event.newValue));
-      }
-    }
-  };
-
-  useEffect(() => {
-    // The custom storage event allows us to update our component
-    // when a change occurs in localStorage outside of our component
-    const listener = (e: Event) => onLocalStorageChange(e as LocalStorageChanged<TValue>);
-    window.addEventListener(LocalStorageChanged.eventName, listener);
-
-    // The storage event only works in the context of other documents (eg. other browser tabs)
-    window.addEventListener('storage', listener);
-
-    // Write default value to the local storage if there currently isn't any value there.
-    // Don't however write a defaultValue that is null otherwise it'll trigger infinite updates.
-    if (storage.getItem(key) === null && defaultValue !== null) {
-      writeStorage(key, defaultValue);
+    const onLocalStorageChange = (
+        event: LocalStorageChanged<TValue> | StorageEvent
+    ) => {
+        // An event value can be of TValue when `localStorage.setItem` is called, or null when
+        // `localStorage.removeItem` is called.
+        if (isTypeOfLocalStorageChanged<TValue>(event)) {
+            if (event.detail.key === key) {
+                updateLocalState(event.detail.value)
+            }
+        } else {
+            if (event.key === key) {
+                updateLocalState(
+                    event.newValue === null ? null : tryParse(event.newValue)
+                )
+            }
+        }
     }
 
-    return () => {
-      window.removeEventListener(LocalStorageChanged.eventName, listener);
-      window.removeEventListener('storage', listener);
-    };
-  }, [key]);
+    useEffect(() => {
+        // The custom storage event allows us to update our component
+        // when a change occurs in localStorage outside of our component
+        const listener = (e: Event) =>
+            onLocalStorageChange(e as LocalStorageChanged<TValue>)
+        window.addEventListener(LocalStorageChanged.eventName, listener)
 
-  const writeState = useCallback((value: TValue) => writeStorage(key, value), [key]);
-  const deleteState = useCallback(() => deleteFromStorage(key), [key]);
-  const state: TValue | null = localState ?? defaultValue;
+        // The storage event only works in the context of other documents (eg. other browser tabs)
+        window.addEventListener("storage", listener)
 
-  return [state, writeState, deleteState];
+        // Write default value to the local storage if there currently isn't any value there.
+        // Don't however write a defaultValue that is null otherwise it'll trigger infinite updates.
+        if (storage.getItem(key) === null && defaultValue !== null) {
+            writeStorage(key, defaultValue)
+        }
+
+        return () => {
+            window.removeEventListener(LocalStorageChanged.eventName, listener)
+            window.removeEventListener("storage", listener)
+        }
+    }, [key])
+
+    const writeState = useCallback(
+        (value: TValue) => writeStorage(key, value),
+        [key]
+    )
+    const deleteState = useCallback(() => deleteFromStorage(key), [key])
+    const state: TValue | null = localState ?? defaultValue
+
+    return [state, writeState, deleteState]
 }

@@ -1,7 +1,11 @@
-import { useLocalStorage } from './use-localstorage';
+import { useLocalStorage } from "./use-localstorage"
 
-export { writeStorage, deleteFromStorage, LocalStorageChanged } from './local-storage-events';
+export {
+    writeStorage,
+    deleteFromStorage,
+    LocalStorageChanged
+} from "./local-storage-events"
 
-export { useLocalStorage };
+export { useLocalStorage }
 
-export default useLocalStorage;
+export default useLocalStorage
