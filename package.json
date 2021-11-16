@@ -50,7 +50,7 @@
         "react-test-renderer": "^16.13.1",
         "ts-jest": "^26.1.0",
         "typedoc": "^0.17.7",
-        "typescript": "^3.9.5"
+        "typescript": "^4.4.4"
     },
     "dependencies": {
         "encrypt-storage": "^2.2.3"

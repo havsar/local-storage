@@ -1,6 +1,6 @@
 import { storage } from "./storage"
 
-;(() => {
+(() => {
     if (typeof global.window === "undefined") {
         global.window = {} as unknown as Window & typeof globalThis
     }

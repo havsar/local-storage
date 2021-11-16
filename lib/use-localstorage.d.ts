@@ -1,5 +1,13 @@
-export declare type LocalStorageNullableReturnValue<TValue> = [TValue | null, (newValue: TValue | null) => void, () => void];
-export declare type LocalStorageReturnValue<TValue> = [TValue, (newValue: TValue | null) => void, () => void];
+export declare type LocalStorageNullableReturnValue<TValue> = [
+    TValue | null,
+    (newValue: TValue | null) => void,
+    () => void
+];
+export declare type LocalStorageReturnValue<TValue> = [
+    TValue,
+    (newValue: TValue | null) => void,
+    () => void
+];
 /**
  * React hook to enable updates to state via localStorage.
  * This updates when the {writeStorage} function is used, when the returned function
